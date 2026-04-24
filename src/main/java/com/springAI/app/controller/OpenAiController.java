@@ -1,5 +1,6 @@
 package com.springAI.app.controller;
 
+import com.springAI.app.dto.ApiResponse;
 import com.springAI.app.service.OpenAiService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,25 +24,38 @@ public class OpenAiController {
     public OpenAiService openAiService;
 
     @GetMapping("/{question}")
-    public ResponseEntity<String> getAnswer(@PathVariable String question) {
+    public ResponseEntity<ApiResponse<String>> getAnswer(@PathVariable String question) {
         logger.info("API Hit: GET /api/openAi/{}", question);
-        String response = openAiService.getAnswer(question);
-        return ResponseEntity.ok("Answer : " + response);
+        try {
+            String response = openAiService.getAnswer(question);
+            return ResponseEntity.ok(ApiResponse.success("OpenAI", "text-chat", response));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("OpenAI", "text-chat", e.getMessage()));
+        }
     }
 
     @PostMapping("/image")
-    public ResponseEntity<String> getAnswerWithImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse<String>> getAnswerWithImage(@RequestParam("file") MultipartFile file) {
         logger.info("API Hit: POST /api/openAi/image");
-        String response = openAiService.getAnswerWithImage(file);
-        logger.info("response : {}", response);
-        return ResponseEntity.ok("Answer: " + response);
+        try {
+            String response = openAiService.getAnswerWithImage(file);
+            return ResponseEntity.ok(ApiResponse.success("OpenAI", "image-analysis", response));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("OpenAI", "image-analysis", e.getMessage()));
+        }
     }
 
     @GetMapping("/generate-image/{description}")
-    public ResponseEntity<String> generateImage(@PathVariable String description) {
+    public ResponseEntity<ApiResponse<String>> generateImage(@PathVariable String description) {
         logger.info("API Hit: GET /api/openAi/generate-image/{}", description);
-        String imageUrl = openAiService.generateImage(description);
-        return ResponseEntity.ok("Image URL: " + imageUrl);
+        try {
+            String imageUrl = openAiService.generateImage(description);
+            return ResponseEntity.ok(ApiResponse.success("OpenAI", "image-generation", imageUrl));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("OpenAI", "image-generation", e.getMessage()));
+        }
     }
-
 }

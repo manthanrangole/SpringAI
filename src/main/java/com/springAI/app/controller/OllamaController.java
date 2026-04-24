@@ -1,5 +1,6 @@
 package com.springAI.app.controller;
 
+import com.springAI.app.dto.ApiResponse;
 import com.springAI.app.service.OllamaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,24 +24,38 @@ public class OllamaController {
     public OllamaService ollamaService;
 
     @GetMapping("/{question}")
-    public ResponseEntity<String> getAnswer(@PathVariable String question) {
+    public ResponseEntity<ApiResponse<String>> getAnswer(@PathVariable String question) {
         logger.info("API Hit: GET /api/ollama/{}", question);
-        String response = ollamaService.getAnswer(question);
-        return ResponseEntity.ok("Answer : " + response);
+        try {
+            String response = ollamaService.getAnswer(question);
+            return ResponseEntity.ok(ApiResponse.success("Ollama", "text-chat", response));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Ollama", "text-chat", e.getMessage()));
+        }
     }
 
     @PostMapping("/image")
-    public ResponseEntity<String> getAnswerWithImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse<String>> getAnswerWithImage(@RequestParam("file") MultipartFile file) {
         logger.info("API Hit: POST /api/ollama/image");
-        String response = ollamaService.getAnswerWithImage(file);
-        logger.info("response : {}", response);
-        return ResponseEntity.ok("Answer: " + response);
+        try {
+            String response = ollamaService.getAnswerWithImage(file);
+            return ResponseEntity.ok(ApiResponse.success("Ollama", "image-analysis", response));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Ollama", "image-analysis", e.getMessage()));
+        }
     }
 
     @GetMapping("/generate-image/{description}")
-    public ResponseEntity<String> generateImage(@PathVariable String description) {
+    public ResponseEntity<ApiResponse<String>> generateImage(@PathVariable String description) {
         logger.info("API Hit: GET /api/ollama/generate-image/{}", description);
-        String response = ollamaService.generateImage(description);
-        return ResponseEntity.ok("Image Generation: " + response);
+        try {
+            String response = ollamaService.generateImage(description);
+            return ResponseEntity.ok(ApiResponse.success("Ollama", "image-generation", response));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Ollama", "image-generation", e.getMessage()));
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.springAI.app.controller;
 
+import com.springAI.app.dto.ApiResponse;
 import com.springAI.app.service.AnthropicService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,26 +24,38 @@ public class AnthropicController {
     public AnthropicService anthropicService;
 
     @GetMapping("/{question}")
-    public ResponseEntity<String> getAnswer(@PathVariable String question) {
+    public ResponseEntity<ApiResponse<String>> getAnswer(@PathVariable String question) {
         logger.info("API Hit: GET /api/anthropic/{}", question);
-        String response = anthropicService.getAnswer(question);
-        return ResponseEntity.ok("Answer : " + response);
+        try {
+            String response = anthropicService.getAnswer(question);
+            return ResponseEntity.ok(ApiResponse.success("Anthropic", "text-chat", response));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Anthropic", "text-chat", e.getMessage()));
+        }
     }
 
     @PostMapping("/image")
-    public ResponseEntity<String> getAnswerWithImage(
-            @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<ApiResponse<String>> getAnswerWithImage(@RequestParam("file") MultipartFile file) {
         logger.info("API Hit: POST /api/anthropic/image");
-        String response = anthropicService.getAnswerWithImage(file);
-        logger.info("response : {}", response);
-        return ResponseEntity.ok("Answer: " + response);
+        try {
+            String response = anthropicService.getAnswerWithImage(file);
+            return ResponseEntity.ok(ApiResponse.success("Anthropic", "image-analysis", response));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Anthropic", "image-analysis", e.getMessage()));
+        }
     }
 
     @GetMapping("/generate-image/{description}")
-    public ResponseEntity<String> generateImage(@PathVariable String description) {
+    public ResponseEntity<ApiResponse<String>> generateImage(@PathVariable String description) {
         logger.info("API Hit: GET /api/anthropic/generate-image/{}", description);
-        String imageUrl = anthropicService.generateImage(description);
-        return ResponseEntity.ok("Image URL: " + imageUrl);
+        try {
+            String imageUrl = anthropicService.generateImage(description);
+            return ResponseEntity.ok(ApiResponse.success("Anthropic", "image-generation", imageUrl));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponse.error("Anthropic", "image-generation", e.getMessage()));
+        }
     }
-
 }
