@@ -184,3 +184,38 @@ curl -X GET "http://localhost:8080/api/openAi/generate-image/a-futuristic-citysc
 - All API keys must be configured before starting the application or the context will fail to load.
 - The `ImageModel` bean is provided by the `spring-ai-starter-model-openai` dependency and is shared across providers for image generation.
 - The Spring Milestones repository is required in `pom.xml` to resolve Spring AI 2.0.0-M4 artifacts correctly.
+
+---
+
+## Standalone Java SDK
+
+This project includes a **Standalone Java Client SDK** (`spring-ai-sdk`) that allows you to interact with this AI server from any Java application (Desktop, Android, or other backend services) without requiring the Spring Boot stack.
+
+### Add Dependency (Maven)
+
+```xml
+<dependency>
+    <groupId>io.github.manthanrangole</groupId>
+    <artifactId>spring-ai-sdk</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+### Quick Usage Example
+
+```java
+import io.github.manthanrangole.springaisdk.SpringAiClient;
+
+// 1. Initialize the client
+SpringAiClient client = new SpringAiClient("http://localhost:8080");
+
+// 2. Chat with any provider
+String answer = client.openai().chat("What is the capital of France?");
+System.out.println("Answer: " + answer);
+
+// 3. Generate images
+String imageUrl = client.anthropic().generateImage("A cat playing the piano");
+System.out.println("Image URL: " + imageUrl);
+```
+
+For more details, see the [SDK README](./spring-ai-sdk/README.md).
