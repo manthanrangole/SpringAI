@@ -206,16 +206,24 @@ This project includes a **Standalone Java Client SDK** (`spring-ai-sdk`) that al
 ```java
 import io.github.manthanrangole.springaisdk.SpringAiClient;
 
-// 1. Initialize the client
-SpringAiClient client = new SpringAiClient("http://localhost:8080");
+public class MyAiApp {
 
-// 2. Chat with any provider
-String answer = client.openai().chat("What is the capital of France?");
-System.out.println("Answer: " + answer);
+    // 1. Declare the client
+    private SpringAiClient springAiClient;
 
-// 3. Generate images
-String imageUrl = client.anthropic().generateImage("A cat playing the piano");
-System.out.println("Image URL: " + imageUrl);
+    public void init() {
+        // 2. Initialize the client
+        springAiClient = new SpringAiClient("http://localhost:8080");
+
+        // 3. Chat with any provider
+        String answer = springAiClient.openai().chat("What is the capital of France?");
+        System.out.println("Answer: " + answer);
+
+        // 4. Generate images
+        String imageUrl = springAiClient.anthropic().generateImage("A cat playing the piano");
+        System.out.println("Image URL: " + imageUrl);
+    }
+}
 ```
 
 For more details, see the [SDK README](./spring-ai-sdk/README.md).
