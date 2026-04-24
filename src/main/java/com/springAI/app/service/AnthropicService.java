@@ -6,4 +6,6 @@ public interface AnthropicService {
     String getAnswer(String question);
 
     String getAnswerWithImage(MultipartFile file);
+
+    String generateImage(String description);
 }

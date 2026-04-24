@@ -4,5 +4,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface OllamaService {
     String getAnswer(String question);
+
     String getAnswerWithImage(MultipartFile file);
+
+    String generateImage(String description);
 }

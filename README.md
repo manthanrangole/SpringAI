@@ -62,6 +62,7 @@ Each AI provider (`openAi`, `anthropic`, `ollama`) is equipped with its own dedi
 - `getAnswerWithSystemPrompt(String question)`: Constraining AI output format and persona natively. 
 - `getMovieInfo(String question)`: Mapping raw AI output directly to Java POJOs/Records via `entity` mapping.
 - `getStreamedAnswer(String question)`: Handling and exporting Flux reactive streams back to the client.
+- `generateImage(String description)`: Prompt-based generation of image URLs utilizing integrated DALL-E configurations.
 
 ## API Endpoints
 
@@ -93,4 +94,17 @@ Example execution:
 curl -X POST http://localhost:8080/api/anthropic/image \
   -H "Content-Type: multipart/form-data" \
   -F "file=@/path/to/your/image.png"
+```
+
+### Prompt-Based Image Generation
+
+Send a descriptive prompt to generate an image directly. Returns the HTTP URL of the generated asset.
+
+- OpenAI: `GET http://localhost:8080/api/openAi/generate-image/{description}`
+- Anthropic: `GET http://localhost:8080/api/anthropic/generate-image/{description}`
+- Ollama: `GET http://localhost:8080/api/ollama/generate-image/{description}`
+
+Example execution:
+```bash
+curl -X GET http://localhost:8080/api/openAi/generate-image/a-futuristic-cityscape-at-night
 ```

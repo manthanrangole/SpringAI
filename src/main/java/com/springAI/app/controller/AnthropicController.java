@@ -37,4 +37,11 @@ public class AnthropicController {
         logger.info("response : {}", response);
         return ResponseEntity.ok("Answer: " + response);
     }
+
+    @GetMapping("/generate-image/{description}")
+    public ResponseEntity<String> generateImage(@PathVariable String description) {
+        logger.info("API Hit: GET /api/anthropic/generate-image/{}", description);
+        String imageUrl = anthropicService.generateImage(description);
+        return ResponseEntity.ok("Image URL: " + imageUrl);
+    }
 }

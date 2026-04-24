@@ -36,4 +36,11 @@ public class OpenAiController {
         logger.info("response : {}", response);
         return ResponseEntity.ok("Answer: " + response);
     }
+
+    @GetMapping("/generate-image/{description}")
+    public ResponseEntity<String> generateImage(@PathVariable String description) {
+        logger.info("API Hit: GET /api/openAi/generate-image/{}", description);
+        String imageUrl = openAiService.generateImage(description);
+        return ResponseEntity.ok("Image URL: " + imageUrl);
+    }
 }

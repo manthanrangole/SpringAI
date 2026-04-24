@@ -8,6 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.image.ImageModel;
+import org.springframework.ai.image.ImagePrompt;
+import org.springframework.ai.image.ImageResponse;
+import org.springframework.ai.openai.OpenAiImageOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
@@ -23,10 +27,14 @@ public class AnthropicServiceImpl implements AnthropicService {
     // With ChatClient
     private final ChatClient chatClient;
 
-    public AnthropicServiceImpl(AnthropicChatModel anthropicChatModel) {
+    private ImageModel imageModel;
+
+    public AnthropicServiceImpl(AnthropicChatModel anthropicChatModel, ImageModel imageModel) {
         this.anthropicChatModel = anthropicChatModel;
         this.chatClient = ChatClient.builder(anthropicChatModel).build();
+        this.imageModel = imageModel;
     }
+
     @Override
     public String getAnswer(String question) {
         logger.info("Anthropic Request received for question: {}", question);
@@ -82,6 +90,19 @@ public class AnthropicServiceImpl implements AnthropicService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to process image", e);
         }
+    }
+
+    @Override
+    public String generateImage(String description) {
+        logger.info("Generating image with OpenAI for description: {}", description);
+        ImageResponse response = imageModel.call(
+                new ImagePrompt(description,
+                        OpenAiImageOptions.builder()
+                                .model("dall-e-3")
+                                .height(1024)
+                                .width(1024)
+                                .build()));
+        return response.getResult().getOutput().getUrl();
     }
 
 }
