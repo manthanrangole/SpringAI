@@ -1,14 +1,32 @@
 # Spring AI Application
 
-A Spring Boot application that integrates with multiple AI providers using the Spring AI framework: OpenAI, Anthropic (Claude), and Ollama. 
+A Spring Boot application that integrates with multiple AI providers using the Spring AI framework: OpenAI, Anthropic (Claude), and Ollama.
 
-This project provides unified controllers and services for standard prompts, system-level instructions, structured data mapping, and multimodal (vision) operations across all supported language models.
+This project provides unified controllers and services for standard prompts, system-level instructions, structured data mapping, multimodal (vision) operations, and prompt-based image generation across all supported language models.
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Spring Boot 4.0.6 |
+| AI Abstraction | Spring AI 2.0.0-M4 |
+| Language | Java 17 |
+| Build Tool | Maven |
+| Cloud AI Models | OpenAI (GPT-4o, DALL-E 3), Anthropic (Claude 3) |
+| Local AI Models | Ollama (DeepSeek, LLaMA, etc.) |
+
+---
 
 ## Prerequisites
+
 - Java 17 or higher
 - Maven
 - API keys for OpenAI and Anthropic
 - Ollama installed locally (for offline models)
+
+---
 
 ## API Key Configuration
 
@@ -16,27 +34,40 @@ API keys and application parameters are configured in `src/main/resources/applic
 
 ### 1. OpenAI
 - Obtain an API key from the OpenAI Platform (platform.openai.com).
+- Navigate to API Keys and generate a new secret key.
 - Add the key to `application.properties` under `spring.ai.openai.api-key`.
 
 ### 2. Anthropic (Claude)
 - Obtain an API key from the Anthropic Console (console.anthropic.com).
+- Navigate to API Keys and generate a new key.
 - Add the key to `application.properties` under `spring.ai.anthropic.api-key`.
 
 ### 3. Ollama (Local Models)
 - Install the runtime from ollama.com.
-- Pull a specific model locally using the terminal. Example: `ollama run deepseek-r1:latest`.
+- Pull a specific model locally using the terminal:
+  ```bash
+  ollama run deepseek-r1:latest
+  ```
+- Ollama runs locally at `http://localhost:11434` by default. Spring AI connects to it automatically.
 - Define the model selection in `application.properties` under `spring.ai.ollama.chat.options.model`.
+
+---
 
 ## Project Configuration Setup
 
-Example configuration block:
+Example `application.properties` configuration:
 
 ```properties
 spring.application.name=springAi
+
 spring.ai.openai.api-key=your-openai-key
+
 spring.ai.anthropic.api-key=your-anthropic-key
+
 spring.ai.ollama.chat.options.model=deepseek-r1:latest
 ```
+
+---
 
 ## Running the Application
 
@@ -50,63 +81,106 @@ spring.ai.ollama.chat.options.model=deepseek-r1:latest
    java -jar target/springAi.jar
    ```
 
-The web server will initialize and bind to port 8080 by default.
+The web server will initialize and bind to port **8080** by default.
+
+---
+
+## Project Structure
+
+```
+src/main/java/com/springAI/app/
+├── SpringAiApplication.java          # Main entry point
+├── controller/
+│   ├── AnthropicController.java      # Anthropic REST endpoints
+│   ├── OpenAiController.java         # OpenAI REST endpoints
+│   └── OllamaController.java         # Ollama REST endpoints
+├── service/
+│   ├── AnthropicService.java         # Anthropic service interface
+│   ├── OpenAiService.java            # OpenAI service interface
+│   └── OllamaService.java            # Ollama service interface
+└── serviceImpl/
+    ├── AnthropicServiceImpl.java     # Anthropic business logic
+    ├── OpenAiServiceImpl.java        # OpenAI business logic
+    └── OllamaServiceImpl.java        # Ollama business logic
+```
+
+---
 
 ## Application Architecture
 
-Each AI provider (`openAi`, `anthropic`, `ollama`) is equipped with its own dedicated controller and service. The service implementations heavily leverage `ChatClient` to tap into advanced features of Spring AI.
+Each AI provider (`openAi`, `anthropic`, `ollama`) is equipped with its own dedicated controller and service. The service implementations heavily leverage `ChatClient` built directly from the provider-specific model to avoid Spring bean ambiguity.
 
-### Supported Service Logic Capabilities:
-- `getAnswer(String question)`: Basic chat response derivation.
-- `getAnswerWithImage(MultipartFile file)`: Multimodal parsing of uploaded files. 
-- `getAnswerWithSystemPrompt(String question)`: Constraining AI output format and persona natively. 
-- `getMovieInfo(String question)`: Mapping raw AI output directly to Java POJOs/Records via `entity` mapping.
-- `getStreamedAnswer(String question)`: Handling and exporting Flux reactive streams back to the client.
-- `generateImage(String description)`: Prompt-based generation of image URLs utilizing integrated DALL-E configurations.
+### Service Capabilities
+
+| Method | Description |
+|---|---|
+| `getAnswer(question)` | Standard chat prompt — returns a plain text response |
+| `getAnswerWithImage(file)` | Multimodal vision — the model reads an uploaded image and describes it |
+| `getAnswerWithSystemPrompt(question)` | Constrains the model persona and output format via a system instruction |
+| `getMovieInfo(question)` | Structured output — maps model response directly to a Java record via `entity()` |
+| `getStreamedAnswer(question)` | Reactive streaming — returns chunks via `Flux<String>` as they are generated |
+| `generateImage(description)` | Generates an image with DALL-E 3 and returns the hosted URL |
+
+---
 
 ## API Endpoints
 
-The API layout is segmented by provider string (`openAi`, `anthropic`, or `ollama`) preceding the desired action.
+The API layout is segmented by provider (`openAi`, `anthropic`, or `ollama`) before the desired action.
 
 ### Standard Text Prompts
 
-Transmit a standard sequence to the desired system.
+Send a natural language question and receive a complete text response.
 
-- OpenAI: `GET http://localhost:8080/api/openAi/{question}`
-- Anthropic: `GET http://localhost:8080/api/anthropic/{question}`
-- Ollama: `GET http://localhost:8080/api/ollama/{question}`
+| Provider | Endpoint |
+|---|---|
+| OpenAI | `GET /api/openAi/{question}` |
+| Anthropic | `GET /api/anthropic/{question}` |
+| Ollama | `GET /api/ollama/{question}` |
 
-Example execution:
 ```bash
-curl -X GET http://localhost:8080/api/anthropic/what-is-java
+curl -X GET http://localhost:8080/api/anthropic/what-is-spring-boot
 ```
 
-### Multimodal Image Analysis
+---
 
-Submit an image binary alongside internal execution logic. The model will parse the contents of the binary and return inferred relationships based on the system instructions.
+### Multimodal Image Analysis (Vision)
 
-- OpenAI: `POST http://localhost:8080/api/openAi/image`
-- Anthropic: `POST http://localhost:8080/api/anthropic/image`
-- Ollama: `POST http://localhost:8080/api/ollama/image`
+Upload an image file. The model will read the visual contents and return a description or analysis.
 
-Example execution:
+| Provider | Endpoint |
+|---|---|
+| OpenAI | `POST /api/openAi/image` |
+| Anthropic | `POST /api/anthropic/image` |
+| Ollama | `POST /api/ollama/image` |
+
 ```bash
 curl -X POST http://localhost:8080/api/anthropic/image \
   -H "Content-Type: multipart/form-data" \
   -F "file=@/path/to/your/image.png"
 ```
 
+---
+
 ### Prompt-Based Image Generation
 
-Send a descriptive prompt to generate an image directly. Returns the HTTP URL of the generated asset.
+Send a descriptive text prompt and receive a URL pointing to the AI-generated image asset (DALL-E 3).
 
-- OpenAI: `GET http://localhost:8080/api/openAi/generate-image/{description}`
-- Anthropic: `GET http://localhost:8080/api/anthropic/generate-image/{description}`
-- Ollama: `GET http://localhost:8080/api/ollama/generate-image/{description}`
+| Provider | Endpoint |
+|---|---|
+| OpenAI | `GET /api/openAi/generate-image/{description}` |
+| Anthropic | `GET /api/anthropic/generate-image/{description}` |
+| Ollama | `GET /api/ollama/generate-image/{description}` |
 
-Example execution:
 ```bash
-curl -X GET http://localhost:8080/api/openAi/generate-image/a-futuristic-cityscape-at-night
+curl -X GET "http://localhost:8080/api/openAi/generate-image/a-futuristic-cityscape-at-night"
 ```
 
+> Note: Ollama does not natively support image generation and will return an informational message.
 
+---
+
+## Notes
+
+- All API keys must be configured before starting the application or the context will fail to load.
+- The `ImageModel` bean is provided by the `spring-ai-starter-model-openai` dependency and is shared across providers for image generation.
+- The Spring Milestones repository is required in `pom.xml` to resolve Spring AI 2.0.0-M4 artifacts correctly.
