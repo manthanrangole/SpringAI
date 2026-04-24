@@ -36,4 +36,11 @@ public class OllamaController {
         logger.info("response : {}", response);
         return ResponseEntity.ok("Answer: " + response);
     }
+
+    @GetMapping("/generate-image/{description}")
+    public ResponseEntity<String> generateImage(@PathVariable String description) {
+        logger.info("API Hit: GET /api/ollama/generate-image/{}", description);
+        String response = ollamaService.generateImage(description);
+        return ResponseEntity.ok("Image Generation: " + response);
+    }
 }

@@ -79,7 +79,7 @@ public class OpenAiServiceImpl implements OpenAiService {
     public String generateImage(String description) {
         logger.info("Generating image with OpenAI for description: {}", description);
         ImageResponse response = imageModel.call(
-                new ImagePrompt(description, 
+                new ImagePrompt(description,
                 OpenAiImageOptions.builder()
                     .model("dall-e-3")
                     .height(1024)

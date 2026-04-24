@@ -108,3 +108,5 @@ Example execution:
 ```bash
 curl -X GET http://localhost:8080/api/openAi/generate-image/a-futuristic-cityscape-at-night
 ```
+
+

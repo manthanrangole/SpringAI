@@ -44,4 +44,5 @@ public class AnthropicController {
         String imageUrl = anthropicService.generateImage(description);
         return ResponseEntity.ok("Image URL: " + imageUrl);
     }
+
 }

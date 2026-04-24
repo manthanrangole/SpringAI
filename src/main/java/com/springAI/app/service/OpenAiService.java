@@ -7,4 +7,3 @@ public interface OpenAiService {
     String getAnswerWithImage(MultipartFile file);
     String generateImage(String description);
 }
-

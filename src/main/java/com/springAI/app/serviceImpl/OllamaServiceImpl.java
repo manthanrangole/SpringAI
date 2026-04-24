@@ -8,7 +8,6 @@ import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Flux;
 
 @Service
 public class OllamaServiceImpl implements OllamaService {
@@ -49,13 +48,6 @@ public class OllamaServiceImpl implements OllamaService {
                 .entity(MovieInfo.class);
     }
 
-    public Flux<String> getStreamedAnswer(String question) {
-        return chatClient.prompt()
-                .user(question)
-                .stream()
-                .content();
-    }
-
     @Override
     public String getAnswerWithImage(MultipartFile file) {
         try {
@@ -67,5 +59,10 @@ public class OllamaServiceImpl implements OllamaService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to process image", e);
         }
+    }
+
+    @Override
+    public String generateImage(String description) {
+        return "Image generation is not natively supported by Ollama text pipelines.";
     }
 }

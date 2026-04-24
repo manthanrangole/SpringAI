@@ -43,4 +43,5 @@ public class OpenAiController {
         String imageUrl = openAiService.generateImage(description);
         return ResponseEntity.ok("Image URL: " + imageUrl);
     }
+
 }
